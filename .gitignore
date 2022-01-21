@@ -1,3 +1,7 @@
 work
 *.wlf
 *.bak
+/transcript
+/vivado.jou
+/vivado.log
+/project_1/
