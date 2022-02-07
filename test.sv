@@ -20,12 +20,35 @@ endpackage
 
 `define to_str(x) `"x`"
 
-module test import l2_pkg::*; (input logic [7:0] i1, i2,output logic [7:0] a,b,c,d,e,f,g, output logic [7:0] u1, output logic [3:0] u2, u3);
+module test 
+  import l2_pkg::*;
+# (
+  parameter ENABLE = 0,
+  parameter TOTO = "FOO",
+  parameter [2:0][1:0][7:0] WOOF   = {"FO", "TO", "TA"}
+)
+(
+  input logic [7:0] i1, i2,
+  output logic [7:0] a,b,c,d,e,f,g, 
+  output logic [7:0] u1, 
+  output logic [3:0] u2, u3
+);
   //initial $display(">>1 %s", `to_str(`FULLNAME));
-  initial $display(">>2 %s", `to_str(`OTIPREFIX`MOD(mac_pcs_ip)));
+  initial $display(">2 %s", `to_str(`OTIPREFIX`MOD(mac_pcs_ip)));
   wire u = i1 & i2;
   assign f = u;
   
+  
+  generate if(TOTO == "FOO") begin
+        initial $display(">> FOO : %s", TOTO);
+  end endgenerate
+  
+  initial $display(">>> FO : %s :: %s ",WOOF ,WOOF[0]);
+  generate for(genvar i=0; i<=2; i++) begin
+        if(WOOF[i] == "FO")
+        initial $display(">>>> FO ");
+    end endgenerate
+
 //  int kk [1:0] = {1,2};
 //  assign g = Tsum(kk);
 
@@ -50,6 +73,10 @@ module test import l2_pkg::*; (input logic [7:0] i1, i2,output logic [7:0] a,b,c
   assign b = v.b;
   assign c = '{2:1'b0, default:1'b1};
   subtest subtest(.i('{a:3, b:4}), .o(d), .o1(e));
+  
+  generate if(ENABLE) begin: EXISTE_PAS
+    existe_pas existe_pas_inst(.dummy(i1));
+  end endgenerate
 endmodule
 
 //--------------------------------------
