@@ -1,5 +1,5 @@
-// vlog -svinputport=relaxed test.sv;vsim test;log /*;run 1ns
-// PAGE 170
+// vlog -svinputport=relaxed test.sv;vsim test;log /*;run 1ns;add wave *
+// PAGE 232
 package l2_pkg;
   typedef struct packed {logic [7:0] a,b;} ab;
 //  function automatic int Tsum (input int driver[]); // UNSUPPORTED
@@ -55,7 +55,7 @@ module test
   //--------------------------------------
   typedef union packed {
     struct packed{
-      bit [3:0] reg2;
+      bit [3:0] reg2; //first 4bits
       bit [3:0] reg1;
     } add;
     bit [7:0] test;
@@ -63,10 +63,22 @@ module test
   
   instr i = 'b1100_0101;
   assign u1 = i.test;
-  assign u2 = i.add.reg1;
-  assign u3 = i.add.reg2;
+  assign u2 = i.add.reg1; //5
+  assign u3 = i.add.reg2; //12
   
-   //--------------------------------------
+  //--------------------------------------
+  // To_01
+  logic [63:0] remove_x1, remove_x2, remove_x3, remove_x4,remove_x5, x_test = '{63:1'b1, default:1'bx};
+  assign remove_x1 = bit'(x_test); //FAIL (only work for 1bit)
+  assign remove_x2 = int'(x_test); //FAIL (only work for 32bits)
+  typedef bit [$high(x_test):0] addressT;
+  assign remove_x3 = addressT'(x_test); // work
+  
+  assign remove_x4 = signed'(x_test); //FAIL
+  assign remove_x5 = unsigned'(x_test); //FAIL
+  
+  
+  //--------------------------------------
   ab v;
   assign v = '{a:1, b:2};
   assign a = v.a;

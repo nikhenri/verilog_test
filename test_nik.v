@@ -66,12 +66,31 @@ always_comb kaka = '{default:0};
 assign unused = 'z;  //must assign because inout must be net, net can go in 'always', net must use assign
 
 // UNION
-union packed {
+typedef union packed {
   logic [7:0] A;
   logic [7:0] B;
-} AB;
+} t_AB;
 
+t_AB AB;
 always_comb AB.A = 8'hAA;
+
+// dynamic cast seem impossible
+bit[7:0] t;
+bit[15:0] a = 'hFF00;
+//always_comb t = a.A; //ERROR
+//always_comb t = t_AB'(a); // no error but not what i want
+//always_comb t = t_AB'(a).A; // ERROR
+//always_comb t = t_AB'(a.A);
+
+typedef union packed {
+  logic [3:0][7:0] bytes;
+} t_b;
+t_b b_u = 'h0102_0304;
+
+byte b1,b2;
+assign b1 = b_u.bytes[2];
+assign b2 = b_u[2*8+:8];
+
 
 // STRUCT
 typedef struct {bit WS, OE;} CON;
@@ -86,9 +105,11 @@ assign BUS.ADDR = 'hC; //no need length in hex
 CON var_con;
 
 
-
-//Assignment order
-
+// shift arithmetic
+logic [3:0] a = 'b1000;
+wire [3:0] b = {1'b1, a} >> 2; //0110
+wire [3:0] c = {1'b1, a} >>> 2; //0110
+wire [3:0] d = signed'({1'b1, a}) >>> 2; //1110
 
 //Clock and increment
 logic clk = 0;
