@@ -7,12 +7,16 @@ import globe::*;
 
 
 //-----------------------------------------------------
-module wrapper #(parameter SIZE, bit TEST=1) (input wire din_0, din_1, sel, output logic wr_out, [SIZE-1:0] unused = 'hAB);
+module wrapper #(parameter SIZE =2**7, bit TEST=1) (input wire din_0, din_1, sel, output logic wr_out, [SIZE-1:0] unused = 'hAB);
 
 initial $display("DEF wrapper = %d", `DEF);
 initial $display("SIZE = %d", SIZE);
 initial $display("TEST = %d", TEST);
 
+initial begin: CHECK_PARAMETER
+    if(2**($clog2(SIZE)) != SIZE) $error("SIZE = '%d' is not valid", SIZE);
+end
+  
 logic [SIZE-1:0] A, B;
 always_comb A = '1;
 always_comb B = {SIZE{1'b1}};
@@ -51,7 +55,17 @@ always_comb begin
 	MAMA = MAMA.last;
 end
 
+// ------------------------ //
+// INSIDE
+localparam c = 2 inside {1, 2, 3};
+localparam d = 7 inside {1, 2, 3};
+initial $display(">>Here!1 %0d vs %0d", c, d);
 
+localparam [31:0] g [2:0] = '{1,2,3};
+localparam h = 2 inside {g};
+localparam k = 7 inside {g};
+initial $display(">>Here!2 %0d vs %0d", h, k);
+// ------------------------ //
 
 logic [7:0] woof;
 logic [7:0] pipi, popo [4:0];
@@ -62,6 +76,32 @@ always_comb kiki = '0;
 always_comb koko = '1;
 always_comb kaka = '{default:0};
 
+// FOR LOOP 
+initial begin
+    for ( int i = 0, j = 0, e = 6; i <= 3; i++, j+=8)
+        $display("Value i,j,e = %0d, %0d, %0d\n", i,j,e );
+    //Value i,j,e = 0, 0, 6
+    //Value i,j,e = 1, 8, 6
+    //Value i,j,e = 2, 16, 6
+    //Value i,j,e = 3, 24, 6
+end
+
+
+
+// FOREACH LOOP 
+logic [1:0][2:0] test_for;
+initial begin
+  foreach (test_for[i, j]) 
+    $display("foreach i,j = %0d, %0d\n", i,j);
+    // foreach i,j = 1, 2
+    // foreach i,j = 1, 1
+    // foreach i,j = 1, 0
+    // foreach i,j = 0, 2
+    // foreach i,j = 0, 1
+    // foreach i,j = 0, 0
+end 
+  
+  
 //always_comb unused = 'z;
 assign unused = 'z;  //must assign because inout must be net, net can go in 'always', net must use assign
 
@@ -96,6 +136,28 @@ assign b2 = b_u[2*8+:8];
 typedef struct {bit WS, OE;} CON;
 struct {bit [15:0] ADDR, DATA; CON CBUS;}  BUS;
 
+typedef struct packed{
+    logic [63:0][7:0]  a64x8_tdata;
+    logic [63:0]       v64_tkeep;
+  } ts_rx_dma_axis;
+  
+ts_rx_dma_axis axis_out = '{v64_tkeep:'1, default:'0};
+
+
+logic [7:0] t,
+logic [7:0] t1
+
+typedef struct {
+    logic             [7:0] feature = 8;
+    logic             [7:0] sub_feature = 'h1;
+    logic             [7:0] technologie = 'h2;
+    logic             [7:0] reseversed = 'h4;
+  } TTEST;
+  TTEST TEST; //Need to create the type THEN create the varaible otherwise Vivado dont work
+  
+  assign t = TEST.feature;
+  assign t1 = TEST.technologie;
+  
 assign BUS.CBUS.WS = 1;
 //assign BUS.DATA = 8'hC;
 //assign BUS.DATA = 2'hC; //put 0 since C = 0100
@@ -110,6 +172,13 @@ logic [3:0] a = 'b1000;
 wire [3:0] b = {1'b1, a} >> 2; //0110
 wire [3:0] c = {1'b1, a} >>> 2; //0110
 wire [3:0] d = signed'({1'b1, a}) >>> 2; //1110
+
+//shift array by to level
+bit [3:0][7:0] tdata;
+bit [7:0][7:0] data_2x;
+int shift_nb = 2;
+always_ff @(posedge clk)
+  data_2x <= data_2x >> (($bits(tdata)/$size(tdata)) * shift_nb); // is equal to >> (2*8)
 
 //Clock and increment
 logic clk = 0;
@@ -176,6 +245,26 @@ always_comb begin
   C1 = {2{B1}};
 end
 
+// struct default (check with Vivado)
+// MUST USE typedef OR WONT WORK !!
+  typedef struct {
+    logic             [7:0] feature = 3;
+    logic             [7:0] sub_feature = 'h1;
+    logic             [7:0] technologie = 'h2;
+    logic             [7:0] reseversed = 'h4;
+  } TTEST;
+    TTEST TEST;
+
+  typedef struct {
+    TTEST TEST = '{feature:1, default:0};
+    logic             [7:0] caca = 'h1;
+  } TTEST2;
+    TTEST2 TEST2;
+    
+    
+  assign t0 = TEST.feature; // 3
+  assign t1 = TEST2.TEST.feature // 1;
+  
 endmodule
 //-----------------------------------------------------
 module test(
