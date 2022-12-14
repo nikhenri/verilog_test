@@ -1,3 +1,4 @@
+// 335
 //vlog -sv test_nik_pkg.v;vlog -sv test_nik.v;quit -sim;vsim work.test_nik;add wave *;run 10
 
 //`default_nettype none
@@ -12,6 +13,9 @@ module wrapper #(parameter SIZE =2**7, bit TEST=1) (input wire din_0, din_1, sel
 initial $display("DEF wrapper = %d", `DEF);
 initial $display("SIZE = %d", SIZE);
 initial $display("TEST = %d", TEST);
+
+localparam T = 'h123;
+initial $display(">> %0h, %s ", T, $sformatf("%0h", T));
 
 initial begin: CHECK_PARAMETER
     if(2**($clog2(SIZE)) != SIZE) $error("SIZE = '%d' is not valid", SIZE);
@@ -264,6 +268,13 @@ end
     
   assign t0 = TEST.feature; // 3
   assign t1 = TEST2.TEST.feature // 1;
+  
+  //-----------------------------------------------------
+  function automatic string get_license_str (int i);
+    string s;
+    s.hextoa(i);
+    return {"iporthgn_",s};
+  endfunction
   
 endmodule
 //-----------------------------------------------------
