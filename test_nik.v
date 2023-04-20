@@ -1,4 +1,4 @@
-// 335
+// PAGE 335
 //vlog -sv test_nik_pkg.v;vlog -sv test_nik.v;quit -sim;vsim work.test_nik;add wave *;run 10
 
 //`default_nettype none
