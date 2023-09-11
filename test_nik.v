@@ -1,4 +1,4 @@
-// PAGE 335
+// PAGE 880
 //vlog -sv test_nik_pkg.v;vlog -sv test_nik.v;quit -sim;vsim work.test_nik;add wave *;run 10
 
 //`default_nettype none
@@ -7,6 +7,14 @@ localparam IK = 99;
 import globe::*;
 
 
+//-----------------------------------------------------
+// extand a signal of certain nb of bit
+logic [15:0] c2h_wr_ptr_relative
+// resize port
+ull_qm_slicer (
+  .i_clk               (i_pcie_clk), //input  logic
+  .i_ptr_wr            (32'(c2h_wr_ptr_relative)) //input  logic [31:0]
+)
 //-----------------------------------------------------
 module wrapper #(parameter SIZE =2**7, bit TEST=1) (input wire din_0, din_1, sel, output logic wr_out, [SIZE-1:0] unused = 'hAB);
 
@@ -20,7 +28,7 @@ initial $display(">> %0h, %s ", T, $sformatf("%0h", T));
 initial begin: CHECK_PARAMETER
     if(2**($clog2(SIZE)) != SIZE) $error("SIZE = '%d' is not valid", SIZE);
 end
-  
+
 logic [SIZE-1:0] A, B;
 always_comb A = '1;
 always_comb B = {SIZE{1'b1}};
@@ -31,7 +39,7 @@ always_comb begin
 	wr_out = (sel) ? din_1 : din_0;
 end
 
-endmodule 
+endmodule
 //-----------------------------------------------------
 //module test_nik(input wire logic din_0, din_1, sel, output logic mux_out, output wire unused); //default is WIRE
 module test_nik(input wire logic din_0, din_1, sel, output logic mux_out); //default is WIRE
@@ -80,7 +88,7 @@ always_comb kiki = '0;
 always_comb koko = '1;
 always_comb kaka = '{default:0};
 
-// FOR LOOP 
+// FOR LOOP
 initial begin
     for ( int i = 0, j = 0, e = 6; i <= 3; i++, j+=8)
         $display("Value i,j,e = %0d, %0d, %0d\n", i,j,e );
@@ -92,10 +100,10 @@ end
 
 
 
-// FOREACH LOOP 
+// FOREACH LOOP
 logic [1:0][2:0] test_for;
 initial begin
-  foreach (test_for[i, j]) 
+  foreach (test_for[i, j])
     $display("foreach i,j = %0d, %0d\n", i,j);
     // foreach i,j = 1, 2
     // foreach i,j = 1, 1
@@ -103,9 +111,9 @@ initial begin
     // foreach i,j = 0, 2
     // foreach i,j = 0, 1
     // foreach i,j = 0, 0
-end 
-  
-  
+end
+
+
 //always_comb unused = 'z;
 assign unused = 'z;  //must assign because inout must be net, net can go in 'always', net must use assign
 
@@ -144,8 +152,17 @@ typedef struct packed{
     logic [63:0][7:0]  a64x8_tdata;
     logic [63:0]       v64_tkeep;
   } ts_rx_dma_axis;
-  
+
 ts_rx_dma_axis axis_out = '{v64_tkeep:'1, default:'0};
+
+//-----------------------------------------------------------
+// assign 1 signal to other, like (others=>) in vhdl
+logic a, b;
+logic c, d;
+
+// always_comb {a, b} = {default: i_axi4l_master.awvalid}; // This do a NOTE in Modelsim
+always_comb {c, d} = '{default: i_axi4l_master.awvalid};
+//-----------------------------------------------------------
 
 
 logic [7:0] t,
@@ -158,10 +175,10 @@ typedef struct {
     logic             [7:0] reseversed = 'h4;
   } TTEST;
   TTEST TEST; //Need to create the type THEN create the varaible otherwise Vivado dont work
-  
+
   assign t = TEST.feature;
   assign t1 = TEST.technologie;
-  
+
 assign BUS.CBUS.WS = 1;
 //assign BUS.DATA = 8'hC;
 //assign BUS.DATA = 2'hC; //put 0 since C = 0100
@@ -201,10 +218,10 @@ int         cnt6 =  '{default:0};
 always_ff @(posedge clk) begin: NAMED_BLOCK
     cnt1 = cnt1 + 1;
     cnt2 += 1;
-    cnt3 ++;	
-    cnt4 = cnt4 + 1'b1	;	
-    cnt5 = cnt5 + 'b1	;	
-    cnt6 = cnt6 + 'h1	;	
+    cnt3 ++;
+    cnt4 = cnt4 + 1'b1	;
+    cnt5 = cnt5 + 'b1	;
+    cnt6 = cnt6 + 'h1	;
 end
 
 
@@ -223,9 +240,9 @@ logic [15:0] I;
 
 always_comb begin
     static logic [15:0] A = 'h1234;
-    
 
-    B = {<<{A}}; //inverse bit	
+
+    B = {<<{A}}; //inverse bit
     {>>{C}} = A; // nothing, expected
     //{>>4{C}} = A; // nothing, same as >>1
     D = {>>{A}}; // nothing, expected
@@ -264,66 +281,66 @@ end
     logic             [7:0] caca = 'h1;
   } TTEST2;
     TTEST2 TEST2;
-    
-    
+
+
   assign t0 = TEST.feature; // 3
   assign t1 = TEST2.TEST.feature // 1;
-  
+
   //-----------------------------------------------------
   function automatic string get_license_str (int i);
     string s;
     s.hextoa(i);
     return {"iporthgn_",s};
   endfunction
-  
+
 endmodule
 //-----------------------------------------------------
 module test(
     input A, CLK,
     output logic B
     );
-    
+
     logic d;
     logic o;
-    
-    
+
+
     always_ff @(posedge CLK) begin
-        //create 2 flipflop 
-        B = d; 
+        //create 2 flipflop
+        B = d;
         d = A;
-        
-        //create 1 flipflop 
+
+        //create 1 flipflop
         //d = A;
-        //B = d; 
-               
-        //create 1 flipflop 
+        //B = d;
+
+        //create 1 flipflop
         //d = A;
         //B <= d;
-        
-        //create 2 flipflop 
+
+        //create 2 flipflop
         //B <= d;
         //d = A;
-        
-        //create 2 flipflop 
+
+        //create 2 flipflop
         //d <= A;
         //B <= d;
-        
-        //create 2 flipflop 
+
+        //create 2 flipflop
         //B <= d;
         //d <= A;
-        
+
         //output to 0
         //B <= 1;
         //B <= 0;
-        
+
         //output to 1
         //B <= 0;
         //B <= 1;
-    end  
-   
-    
-    //assign B <= 1; //illegal 
-    
+    end
+
+
+    //assign B <= 1; //illegal
+
     //output to 1
     //assign B = 0;
     //assign B = 1;

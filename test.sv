@@ -1,5 +1,4 @@
 // vlog -svinputport=relaxed test.sv;vsim test;log /*;run 1ns;add wave *
-// PAGE 281
 package l2_pkg;
   typedef struct packed {logic [7:0] a,b;} ab;
 //  function automatic int Tsum (input int driver[]); // UNSUPPORTED
